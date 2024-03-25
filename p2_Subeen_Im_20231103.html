@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Drawing Web</title>
+  <div
+</head>
+<body>
+  <header>
+    <h1><strong>Drawing Your Idea</strong></h1>
+  </header>
+  <input type="file" accept="image/*" style = display: none; onchange="FileUpload(event) ">
+  <br> 
+  <img id="uploadedImage" src='#' style="max-width: 0px; max-height: 0px;">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  
+  <script>
+    let img;
+    let dots = [];
+    let drawingStopped = false; 
+
+    function FileUpload(event) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          const uploadedImage = document.getElementById("uploadedImage");
+          uploadedImage.src = e.target.result;
+          img = loadImage(e.target.result);
+          
+          dots = [];
+        }
+        reader.readAsDataURL(file);
+      }
+    }
+    
+    
+    function preload() {
+      img = loadImage('https://hips.hearstapps.com/hmg-prod/images/champagne-beach-espiritu-santo-island-vanuatu-royalty-free-image-1655672510.jpg?crop=1.00xw:0.752xh;0,0.173xh&resize=1024:*');
+    }
+
+    function mousePressed() {
+      if(img) {
+        let c = img.get(mouseX, mouseY);
+        for (let i = 0; i < 40; i++) {
+          dots.push(new ColorDot(mouseX, mouseY, c));
+        }
+      }
+    }
+    
+    function stopDrawing() {
+      drawingStopped = true;
+    }
+
+    function resumeDrawing() {
+      drawingStopped = false;
+    }
+
+    function reset() {
+      background(0);
+      dots = [];
+    }
+
+    function setup() {
+      createCanvas(600, 600);
+      background(0);
+    }
+    
+    function draw() {
+      if (!drawingStopped) { 
+        let c = img.get(mouseX, mouseY);
+        dots.push(new ColorDot(mouseX, mouseY, c));
+
+        for (let i = 0; i < dots.length; i++) {
+          dots[i].show();
+          dots[i].update();
+          if (dots[i].isOut()) {
+            dots.splice(i, 1);
+          }
+        }
+      }
+    }
+
+    class ColorDot {
+      constructor(_x, _y, _c) {
+        this.x = _x;
+        this.y = _y;
+        this.d = 10; 
+        this.c = _c;
+        this.dx = random(-0.2, 0.2); 
+        this.dy = random(-0.2, 0.2); 
+        this.life = random(40, 100);
+        this.count = 0;
+      }
+
+      show() {
+        stroke(0);
+        strokeWeight(0.2);
+        fill(this.c);
+        ellipse(this.x, this.y, this.d);
+      }
+
+      update() {
+        this.d *= random(0.96, 0.99);
+        this.dx += random(-0.2, 0.2);
+        this.dy += random(-0.2, 0.2); 
+        this.x += this.dx;
+        this.y += this.dy;
+        this.count++;
+      }
+
+      isOut() {
+        return this.count > this.life;
+      }
+    }
+  </script>
+
+  <!-- Stop Drawing  -->
+  <button onclick="stopDrawing()">Stop</button>
+  <!-- Resume Drawing  -->
+  <button onclick="resumeDrawing()">Restart</button>
+  <button onclick="reset()">Reset</button>
+  
+</body>
+</html>
